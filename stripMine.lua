@@ -1,5 +1,5 @@
 -- base movement
--- pastebin caDvzUWK
+-- pastebin sfdXCBH8
 --Home position/orientation assumed 0,0,0 north =0 east =1 south =2 west =3
 local tArgs = {...}  -- expecting <length> <tunnels (forced even)>
 local tunnels = 0
@@ -294,9 +294,11 @@ function dropOff()
         turtle.select(i)
         turtle.dropDown()
     end
+    turtle.select(1)
 end
 
 function pitStop()
+    refuel()
     if tunnels > 1 and tArgs[2]%2 == 0 then
         path[1] = path[1].."r"
         for i=1,(tunnels-1)*4 do
@@ -311,7 +313,17 @@ function pitStop()
         path[1] = path[1].."w"
     end
 end
+function refuel()
+    if turtle.getFuelLevel() < 200 then
+        repeat 
+            turtle.select(2)
+            turtle.refuel()
+        until(turtle.getFuelLevel()>200)
+        turtle.select(1)
+    end
+end
 
+refuel()
 createPath()
 determineMovement()
 returnHome()
