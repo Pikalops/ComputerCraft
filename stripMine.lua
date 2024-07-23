@@ -1,5 +1,5 @@
 -- base movement
--- pastebin wY5c4iqu
+-- pastebin caDvzUWK
 --Home position/orientation assumed 0,0,0 north =0 east =1 south =2 west =3
 local tArgs = {...}  -- expecting <length> <tunnels (forced even)>
 local tunnels = 0
