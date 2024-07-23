@@ -1,0 +1,149 @@
+
+local startY = 0
+
+local homeX = 0
+local homeZ = 0
+turns = 10
+length = 46
+
+function getLocation()
+    print(homeX,startY,homeZ)
+end
+
+function digUntilEmpty()
+    while turtle.detect() do
+        turtle.dig()
+    end
+end
+
+function fuel()
+    local f = turtle.getFuelLevel()
+    if f < 100 then
+        turtle.select(2)
+        turtle.refuel()
+    end
+end
+
+function torch()
+    turtle.select(1)
+    local heldItem = turtle.getItemDetail()
+    if heldItem.name == "minecraft:torch" then
+        if turtle.detectUp() == true then
+            turtle.digUp()
+            turtle.placeUp()
+        else turtle.placeUp()
+        end
+    end
+end
+
+function forward(x)
+    while x > 0 do
+        digUntilEmpty()
+        turtle.forward()
+        turtle.digUp()
+        homeX = homeX+1
+        x = x-1
+        if x % 8 == 0 then
+            torch()
+        end
+    end
+    print("Going Forward")
+end
+
+function zForward(x)
+    print("Connecting lanes foward")
+    turtle.turnRight()
+    while x > 0 do
+        digUntilEmpty()
+        turtle.forward()
+        turtle.digUp()
+        homeZ = homeZ + 1
+        x = x-1
+    end
+    turtle.turnRight()
+    turns = turns - 1
+end
+
+function back(x)
+    print("coming back")
+    while x > 0 do
+        digUntilEmpty()
+        turtle.forward()
+        turtle.digUp()
+        homeX = homeX-1
+        x = x-1
+        if x % 8 == 0 then
+            torch()
+        end
+    end
+end
+
+function zBack(x)
+    print("Connecting lanes back")
+    while x > 0 do
+        digUntilEmpty()
+        turtle.forward()
+        turtle.digUp()
+        homeZ = homeZ + 1
+        x = x-1
+    end
+    turtle.turnLeft()
+    turns = turns - 1
+end
+
+function down()
+    turtle.digDown()
+    turtle.down()
+    startY = startY-1
+end
+
+function turnAround()
+    turtle.turnLeft()
+    turtle.turnLeft()
+end
+
+function emptySelf()
+    turtle.select(3)
+    turtle.dropDown()
+    local i = 4
+    while i < 17 do
+        turtle.select(i)
+        turtle.dropDown()
+        i = i+1
+    end
+    turtle.select(2)
+end
+
+
+function returnHome()
+    turtle.turnLeft()
+    forward(homeZ)
+end
+
+function pitStop()
+    print("Dropping off")
+    fuel()
+    turtle.turnRight()
+    forward(homeZ)
+    emptySelf()
+    turnAround()
+    forward(homeZ)
+end
+
+function stripMine()
+    while turns > 0 do
+        forward(length)
+        getLocation()
+        zForward(4)
+        getLocation()
+        back(length)
+        getLocation()
+        pitStop()
+        zBack(4)
+        getLocation()
+    end
+end
+
+stripMine()
+returnHome()
+emptySelf()
