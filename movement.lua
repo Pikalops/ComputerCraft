@@ -10,6 +10,7 @@ coorZ = 0
 homeX = 0
 homeY = 0
 homeZ = 0
+homeFacing = facing
 
 facing = 0 --%4 in future
 
@@ -122,13 +123,15 @@ function mForward()
 end
 
 function mUp()
-    turtle.up()
-    coorY = coorY + 1
+    if turtle.up() then
+        coorY = coorY + 1
+    end
 end
 
 function mDown()
-    turtle.down()
-    coorY = coorY - 1
+    if turtle.down() then
+        coorY = coorY - 1
+    end
 end
 
 -- To stop getting stuck by gravity blocks
@@ -168,7 +171,114 @@ function dDown()
         turtle.digDown()
 end
 
--- homing functions
+-- go to function
+function goTo(x,y,z,d)
+    if d == nil then
+        d = dir
+    end
+    if coorX > x then               --Resolve X axis home
+
+        repeat
+
+            tRight()
+
+        until(dir == "South")
+
+        repeat
+
+            dForward(1)
+            mForward()
+
+        until(coorX == x)
+
+    elseif coorX <  x then
+
+        repeat
+
+            tRight()
+
+        until(dir == "North")
+
+        repeat 
+
+            dForward(1)
+            mForward()
+
+        until(coorX == x)
+
+    end
+
+
+
+    if coorZ > z then               --Resolve Z axis home
+
+        repeat
+
+            tRight()
+
+        until(dir == "West")
+
+        repeat
+
+            dForward(1)
+            mForward()
+
+        until(coorZ == z)
+
+    elseif coorZ < z then
+
+        repeat
+
+            tRight()
+
+        until(dir == "East")
+
+        repeat
+
+            dForward(1)
+            mForward()
+
+        until(coorZ == z)
+
+    end
+
+
+
+    if coorY > y then                --Resolve Y axis home
+
+        repeat
+
+            mDown(1)
+
+        until(coorY == y)
+
+    elseif coorY < y then
+
+        repeat
+
+            mUp(1)
+
+        until(coorY == y)
+
+    end
+    while dir ~= d do
+        tRight()
+    end
+end
+
+function setHome()
+    homeX = coorX
+    homeY = coorY
+    homeZ = coorZ
+    homeFacing = facing
+end
+
+function resetHome()
+    homeX = 0
+    homeY = 0
+    homeZ = 0
+end
+
 function returnHome()
 
     if coorX > homeX then               --Resolve X axis home
@@ -258,18 +368,6 @@ function returnHome()
     end
 end
 
-function setHome()
-    homeX = coorX
-    homeY = coorY
-    homeZ = coorZ
-end
-
-function resetHome()
-    homeX = 0
-    homeY = 0
-    homeZ = 0
-end
-
 
 return {
     coorX = coorX,
@@ -293,4 +391,7 @@ return {
     homeX = homeX,
     homeY = homeY,
     homeZ = homeZ,
+    homeFacing = homeFacing,
+    dir = dir,
+    goTo = goTo,
 }
