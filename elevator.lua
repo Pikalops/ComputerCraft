@@ -1,6 +1,8 @@
 --pastebin BfXczBtR
 
 local tArgs = {...}
+local direction = nil
+local distance = nil
 
 function usage()
 	print("Usage: elevator <direction> [distance]\n\n")
@@ -57,19 +59,27 @@ if (table.getn(tArgs) < 1) or (table.getn(tArgs) > 2) then
 	usage()
 elseif (tArgs[1] ~= "up") and (tArgs[1] ~= "down") then
 	usage()
+elseif (table.getn(tArgs) == 2) and (tArgs[2] < 1) then
+	usage()
+end
+
+direction = tArgs[1]
+
+if table.getn(tArgs) == 2 then
+	distance = tArgs[2]
 end
 
 refuel()
 
 -- elevator down
-if tArgs[1] == "down" then
+if direction == "down" then
 	-- Distance was provided, dig down that many blocks
-	if table.getn(tArgs) == 2 then
-		for i=1,tArgs[2] do 
+	if distance ~= nil then
+		for i=1,distance do 
 			turtle.digDown()
 			turtle.down()
 		end
-		writeCache(tArgs[2])
+		writeCache(distance)
 	-- No distance provided, go down until a block is hit
 	else
 		local i=0
@@ -81,14 +91,11 @@ if tArgs[1] == "down" then
 	end
 -- elevator up
 else
-	local distance = 0
-	-- Distance was provided, go up that many blocks
-	if table.getn(tArgs) == 2 then
-		distance = tArgs[2]
 	-- No distance provided, use cached distance
-	else
+	if distance == nil then
 		distance = readCache()
 	end
+	
 	for i=1,distance do 
 		turtle.digUp()
 		turtle.up()
