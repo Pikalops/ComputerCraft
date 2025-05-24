@@ -62,13 +62,18 @@ end
 
 -- Recursive function to gather all connected blocks of the same type
 function grabEm()
+    maxSteps = 5
+    hasRun = false
     checkFuel()
+    -- Select desired block
     turtle.select(1)
     if turtle.compare() then
+        -- Next block is match
         print("Initial compare  ")
         m.dForward()
         m.mForward()
         if turtle.compareUp() then
+            -- Block above is match
             print("Up compare")
             m.setHome()
             while turtle.compareUp() do
@@ -77,6 +82,7 @@ function grabEm()
             end
             m.returnHome()
             if turtle.compareDown() then
+                -- Block below is match
                 print("Down compare")
                 m.setHome()
                     while turtle.compareDown() do
@@ -85,33 +91,47 @@ function grabEm()
                     end
                 m.returnHome()
                 print (dir)
-                dirCheck()
             end
+        print("turtle.compareUp() match")
         end
         grabEm()
-    elseif turtle.compare() == false then
-        -- try a few blocks up
-        print("trying up")
-        local i = 0
-        if i < 5 and turtle.detectUp() == false then
-            i=i+1
-            m.mUp()
-            if turtle.compare() then
-                print("try up Match!")
-                grabEm()
-            end
-        elseif i == 5 then
-            returnHome()
-        elseif i<=10 and turtle.detectDown() == false then
-            print("trying down")
-            i=i+1
-            m.mDown()
-            if turtle.compare() then
-                grabEm()
+        return
+    else
+        m.setHome()
+        print("up for loop")
+        for i=1,maxSteps,1
+        do
+            if turtle.detectUp() == false then
+                print("moving up for loop")
+                m.mUp()
+                if turtle.compare() then
+                    print("try up Match!")
+                    grabEm()
+                    return
+                end
+            else
+                break
             end
         end
+        m.returnHome()
+        print("down for loop")
+        for i=1,maxSteps,1
+        do
+            if turtle.detectDown() == false then
+                print("moving down for loop")
+                m.mDown()
+                if turtle.compare() then
+                    print("try down Match!")
+                    grabEm()
+                    return
+                end
+            else
+                break
+            end
+
+        end
+        m.returnHome()
     end
-    dirCheck()
 end
  
         
@@ -119,4 +139,8 @@ end
 grabEm()
 m.resetHome()
 m.returnHome()
+
+--debug purposes, turning the turtle back north
+m.tLeft()
+m.tLeft()
 
