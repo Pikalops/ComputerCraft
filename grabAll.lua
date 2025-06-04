@@ -72,6 +72,10 @@ function checkVerticalContinue()
                 return
             end
             turtle.up()
+            if turtle.compare() then
+                grabAll()
+                return
+            end
         else
             break
         end
@@ -84,6 +88,10 @@ function checkVerticalContinue()
                 return
             end
             turtle.down()
+            if turtle.compare() then
+                grabAll()
+                return
+            end
         else
             turtle.goTo(trunkX, trunkY, trunkZ)
             break
@@ -95,7 +103,7 @@ end
 
 -- Main recursion function to gather all connected blocks for the same type
 function grabAll()
-    maxSteps = 5
+    maxSteps = 3
 
     checkFuel()
 
@@ -160,8 +168,11 @@ function grabAll()
             turtle.goTo(trunkX, trunkY, trunkZ)
         end
 
-        -- got to other branch
-        turtle.goTo(branchX, branchY, branchZ,"East")
+        -- got to other branch if still in first branch
+        if turtle.dir == "West" then
+            turtle.goTo(branchX, branchY, branchZ,"East")
+        end
+
         if turtle.compare() then
             fullRecursion = false
             grabAll()
@@ -180,11 +191,7 @@ function grabAll()
             end
             -- reset and see if able to continue before ending recursion
             turtle.goTo(branchX, branchY, branchZ,"North")
-            if turtle.compare() then
-                fullRecursion = false
-                grabAll()
-                return
-            end
+            checkVerticalContinue()
         else
             return
         end
