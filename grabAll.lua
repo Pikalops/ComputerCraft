@@ -1,5 +1,7 @@
--- grab movement library
-require "turtle"
+-- grab movement library if not already active
+if turtle.extended == nil then
+    require "turtle"
+end
 
 -- Initiate extra location variables
 -- for main recursion
@@ -114,18 +116,19 @@ function grabAll()
             end
             --resolve Y
             turtle.goTo(trunkX, trunkY, trunkZ)
-
-            -- -Y checks
-            if turtle.compareDown() then
-                setTrunk()
-                while turtle.compareDown() do
-                    turtle.digDown()
-                    turtle.down()
-                end
-                --resolve Y
-                turtle.goTo(trunkX, trunkY, trunkZ)
-            end
         end
+
+        -- -Y checks
+        if turtle.compareDown() then
+            setTrunk()
+            while turtle.compareDown() do
+                turtle.digDown()
+                turtle.down()
+            end
+            --resolve Y
+            turtle.goTo(trunkX, trunkY, trunkZ)
+        end
+
 
         -- branch logic
         if turtle.dir == "North" then
@@ -146,16 +149,42 @@ function grabAll()
 
     --secondary branch logic
     if fullRecursion == true then
+        --final down check for end of branch
+        if turtle.compareDown() then
+            setTrunk()
+            while turtle.compareDown() do
+                turtle.digDown()
+                turtle.down()
+            end
+            --resolve Y
+            turtle.goTo(trunkX, trunkY, trunkZ)
+        end
+
+        -- got to other branch
         turtle.goTo(branchX, branchY, branchZ,"East")
         if turtle.compare() then
             fullRecursion = false
             grabAll()
             return
         elseif turtle.dir == "East" then
+
+        --final down check for end of branch
+            if turtle.compareDown() then
+                setTrunk()
+                while turtle.compareDown() do
+                    turtle.digDown()
+                    turtle.down()
+                end
+                --resolve Y
+                turtle.goTo(trunkX, trunkY, trunkZ)
+            end
+            -- reset and see if able to continue before ending recursion
             turtle.goTo(branchX, branchY, branchZ,"North")
-            fullRecursion = false
-            grabAll()
-            return
+            if turtle.compare() then
+                fullRecursion = false
+                grabAll()
+                return
+            end
         else
             return
         end
