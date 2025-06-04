@@ -1,20 +1,37 @@
---get movement library
-local m=require("movement")
+-- grab movement library
+require "turtle"
 
+-- Initiate extra location variables
+-- for main recursion
+local trunkX = 0
+local trunkY = 0
+local trunkZ = 0
 
--- location variables
-local branchX
-local branchY
-local branchZ
-local branchFacing
+-- for offshoot branches
+local branchX = 0
+local branchY = 0
+local branchZ = 0
 
--- store coordinates and facing before going left/right
-function setBranch()
-    branchX = m.coorX
-    branchY = m.coorY
-    branchZ = m.coorZ
+-- flag for reaching full recursion depth
+local fullRecursion = false
+
+--Saftey dig functions to resolve possible issues with gravity blocks
+function digUntilEmpty()
+    -- dig until no more blocks in front
+    while turtle.detect() do
+        turtle.dig()
+    end
 end
 
+function digUpUntilEmpty()
+    -- dig until no more blocks above
+    while turtle.detectUp() do
+        turtle.digUp()
+    end
+end
+
+
+-- refuel if needed
 function checkFuel()
     if turtle.getFuelLevel() < 100 then
         print("Refueling")
@@ -30,117 +47,128 @@ function checkFuel()
     end
 end
 
-function dirCheck()
-    if dir == "North" then
-        setBranch()
-        print("setBranch" .. " " .. m.dir)
-        while dir ~= "West" do
-            m.tLeft()
-        end
-        if turtle.compare() then
-            grabEm()
-        end
-    elseif dir == "East" then
-        if turtle.compare() then
-            grabEm()
-        else
-            print("going to branch home")
-            goTo(branchX, branchY, branchZ)
-            if turtle.compare() then
-                grabEm()
-            end
-    end
-    elseif dir == "West" then
-        if turtle.compare() then
-            grabEm()
-        else
-            print("going to branch home")
-            goTo(branchX, branchY, branchZ)
-        end
-    end
+-- store coordinates for the main trunk
+function setTrunk()
+    trunkX = turtle.coorX
+    trunkY = turtle.coorY
+    trunkZ = turtle.coorZ
 end
 
--- Recursive function to gather all connected blocks of the same type
-function grabEm()
-    maxSteps = 5
-    hasRun = false
-    checkFuel()
-    -- Select desired block
-    turtle.select(1)
-    if turtle.compare() then
-        -- Next block is match
-        print("Initial compare  ")
-        m.dForward()
-        m.mForward()
-        if turtle.compareUp() then
-            -- Block above is match
-            print("Up compare")
-            m.setHome()
-            while turtle.compareUp() do
-                m.dUp()  
-                m.mUp()
+-- store coordinates before going left/right
+function setBranch()
+    branchX = turtle.coorX
+    branchY = turtle.coorY
+    branchZ = turtle.coorZ
+end
+
+function checkVerticalContinue()
+    setTrunk()
+    for i=1,maxSteps,1 do
+        if turtle.detectUp() == false then
+            if turtle.compare() then
+                grabAll()
+                return
             end
-            m.returnHome()
-            if turtle.compareDown() then
-                -- Block below is match
-                print("Down compare")
-                m.setHome()
-                    while turtle.compareDown() do
-                        m.dDown()
-                        m.mDown()
-                    end
-                m.returnHome()
-                print (dir)
-            end
-        print("turtle.compareUp() match")
+            turtle.up()
+        else
+            break
         end
-        grabEm()
+    end
+    turtle.goTo(trunkX, trunkY, trunkZ)
+    for i=1,maxSteps,1 do
+        if turtle.detectDown() == false then
+            if turtle.compare() then
+                grabAll()
+                return
+            end
+            turtle.down()
+        else
+            turtle.goTo(trunkX, trunkY, trunkZ)
+            break
+        end
+    end
+    fullRecursion = true
+end
+    
+
+-- Main recursion function to gather all connected blocks for the same type
+function grabAll()
+    maxSteps = 5
+
+    checkFuel()
+
+    --select desired item
+    turtle.select(1)
+
+    --start of primary logic
+    if turtle.compare() then
+        digUntilEmpty()
+        turtle.forward()
+        -- begin vertical checks
+        -- +Y checks
+        if turtle.compareUp() then
+            setTrunk()
+            while turtle.compareUp() do
+                digUpUntilEmpty()
+                turtle.up()
+            end
+            --resolve Y
+            turtle.goTo(trunkX, trunkY, trunkZ)
+
+            -- -Y checks
+            if turtle.compareDown() then
+                setTrunk()
+                while turtle.compareDown() do
+                    turtle.digDown()
+                    turtle.down()
+                end
+                --resolve Y
+                turtle.goTo(trunkX, trunkY, trunkZ)
+            end
+        end
+
+        -- branch logic
+        if turtle.dir == "North" then
+            turtle.turnLeft()
+            setBranch()
+            if turtle.compare() then
+                grabAll()
+                return
+            end
+        end
+        
+        grabAll()
         return
     else
-        m.setHome()
-        print("up for loop")
-        for i=1,maxSteps,1
-        do
-            if turtle.detectUp() == false then
-                print("moving up for loop")
-                m.mUp()
-                if turtle.compare() then
-                    print("try up Match!")
-                    grabEm()
-                    return
-                end
-            else
-                break
-            end
-        end
-        m.returnHome()
-        print("down for loop")
-        for i=1,maxSteps,1
-        do
-            if turtle.detectDown() == false then
-                print("moving down for loop")
-                m.mDown()
-                if turtle.compare() then
-                    print("try down Match!")
-                    grabEm()
-                    return
-                end
-            else
-                break
-            end
+        -- vertical checks too see if able to continue recursion
+        checkVerticalContinue()
+    end
 
+    --secondary branch logic
+    if fullRecursion == true then
+        turtle.goTo(branchX, branchY, branchZ,"East")
+        if turtle.compare() then
+            fullRecursion = false
+            grabAll()
+            return
+        elseif turtle.dir == "East" then
+            turtle.goTo(branchX, branchY, branchZ,"North")
+            fullRecursion = false
+            grabAll()
+            return
+        else
+            return
         end
-        m.returnHome()
     end
 end
- 
+
+grabAll()
+turtle.goTo(0,0,0,"North")
+
+
+
         
 
-grabEm()
-m.resetHome()
-m.returnHome()
 
---debug purposes, turning the turtle back north
-m.tLeft()
-m.tLeft()
 
+        
