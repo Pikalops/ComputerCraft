@@ -1,10 +1,51 @@
---pastebin vgKwR9x4
-files = {BfXczBtR="elevator.lua", sfdXCBH8="stripMine.lua", vgKwR9x4="deploy.lua"}
-for pasteCode,fileName in pairs(files) do
+local args = {...}
+branch = "main"
 
-    if fs.exists(fileName) then
-        fs.delete(fileName)
+function usage()
+	print("Usage: deploy <repo URL> [branch]\n\n")
+	print("If branch is omitted, main will be downloaded.\n")
+    print("Older repos user \"master\" as the default branch, specify it if necessary.\n")
+	error()
+end
+
+-- Validate command line arguments
+if (table.getn(args) < 1) or (table.getn(args) > 2) then
+	usage()
+elseif (table.getn(args) == 2) then
+    branch = args[2]
+end
+
+--repoUrl = "https://github.com/Pikalops/ComputerCraft"
+-- Parse repo URL
+repoUrl = args[1]
+if (string.sub(repoUrl, -1) == "/") then
+    repoUrl = string.sub(repoUrl, 1, -2)
+end
+
+-- Get repo name from URL
+repoName = string.sub(repoUrl, string.find(repoUrl, "/[^/]*$") + 1)
+
+-- Calculate url of archive for provided repo
+archiveName = branch .. ".tar.gz"
+archiveUrl = repoUrl .. "/archive/" .. archiveName
+
+-- Calculate name of folder extracted from archive (to copy from and clean up)
+folderName = repoName .. "-" .. branch
+
+-- Download and extract archive
+shell.run("wget", archiveUrl)
+shell.run("tar", "-xzf", archiveName)
+
+-- Put files in /usr
+files = fs.list(folderName)
+for i = 1, #files do
+    if (fs.exists("/usr/" .. files[i])) then
+        fs.delete("/usr/" .. files[i])
     end
 
-    shell.execute("pastebin get "..pasteCode.." "..fileName)
+    shell.run("move", folderName .. "/" .. files[i], "/usr/")
 end
+
+-- Clean up
+shell.run("rm", folderName)
+shell.run("rm", archiveName)
