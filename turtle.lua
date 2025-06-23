@@ -15,7 +15,7 @@ local baseForward = turtle.forward
 local baseUp = turtle.up
 local baseDown = turtle.down
 
-function turtle:updateDir()
+function turtle.updateDir()
     local facing = turtle.facing%4
 
     if facing == 0 then
@@ -31,7 +31,7 @@ function turtle:updateDir()
     end
 end
 
-function turtle:updateCoor()
+function turtle.updateCoor()
     local facing = turtle.facing%4
 
     if facing == 0 then
@@ -51,24 +51,24 @@ function turtle:updateCoor()
     end
 end
 
-function turtle:turnRight()
+function turtle.turnRight()
     baseTurnRight()
     turtle.facing = turtle.facing +1
     turtle.updateDir()
 end
 
-function turtle:turnLeft()
+function turtle.turnLeft()
     baseTurnLeft()
     turtle.facing = turtle.facing -1
     turtle.updateDir()
 end
 
-function turtle:turnAround()
+function turtle.turnAround()
     turtle.turnLeft()
     turtle.turnLeft()
 end
 
-function turtle:forward()
+function turtle.forward()
     local success = baseForward()
     if success == false then
         print("Stuck at "..turtle.coorX..","..turtle.coorY..","..turtle.coorZ)
@@ -79,7 +79,7 @@ function turtle:forward()
     turtle.updateCoor()
 end
 
-function turtle:up()
+function turtle.up()
     local success = baseUp()
     if success == false then
         print("Stuck at "..turtle.coorX..","..turtle.coorY..","..turtle.coorZ)
@@ -90,7 +90,7 @@ function turtle:up()
     turtle.coorY = turtle.coorY +1
 end
 
-function turtle:down()
+function turtle.down()
     local success = baseDown()
 
     if success == false then
@@ -105,15 +105,14 @@ end
 
 -- go to function
 --d is optional, will not turn after moving unless provided
-function turtle:goTo(x,y,z,d) 
+function turtle.goTo(x,y,z,d)
     if d == nil then
-        d = dir
+        d = turtle.dir
     end
-
     if turtle.coorX > x then               --Resolve X axis home
         repeat
             turtle.turnRight()
-        until(d == "South")
+        until(turtle.dir == "South")
         repeat
             turtle.dig()
             turtle.forward()
@@ -122,17 +121,16 @@ function turtle:goTo(x,y,z,d)
     elseif turtle.coorX <  x then
         repeat
             turtle.turnRight()
-        until(d == "North")
+        until(turtle.dir == "North")
         repeat 
             turtle.dig()
             turtle.forward()
         until(turtle.coorX == x)
     end
-
     if turtle.coorZ > z then               --Resolve Z axis home
         repeat
             turtle.turnRight()
-        until(d == "West")
+        until(turtle.dir == "West")
         repeat
             turtle.dig()
             turtle.forward()
@@ -141,7 +139,7 @@ function turtle:goTo(x,y,z,d)
     elseif turtle.coorZ < z then
         repeat
             turtle.turnRight()
-        until(d == "East")
+        until(turtle.dir == "East")
         repeat
             turtle.dig()
             turtle.forward()
@@ -151,20 +149,25 @@ function turtle:goTo(x,y,z,d)
     
     if turtle.coorY > y then                --Resolve Y axis home
         repeat
+            turtle.digDown()
             turtle.down()
         until(turtle.coorY == y)
 
     elseif turtle.coorY < y then
         repeat
+            turtle.digUp()
             turtle.up()
         until(turtle.coorY == y)
     end
     
-    while dir ~= d do
+    --Resolve diection
+
+    while turtle.dir ~= d do
         turtle.turnRight()
     end
+
 end
 
-function turtle:dumpState()
+function turtle.dumpState()
     print("dir: "..turtle.dir.."\nfacing: "..turtle.facing.."\ncoord: ("..turtle.coorX..","..turtle.coorY..","..turtle.coorZ..")")
 end
