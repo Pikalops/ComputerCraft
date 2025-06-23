@@ -36,8 +36,9 @@ folderName = repoName .. "-" .. branch
 shell.run("wget", archiveUrl)
 shell.run("tar", "-xzf", archiveName)
 
--- Get rid of pkg folder, not useful ingame
+-- Get rid of pkg folder and readme, not useful ingame
 shell.run("rm", folderName .. "/pkg")
+shell.run("rm", folderName .. "/README.md")
 
 -- Put files in /usr
 files = fs.list(folderName)
