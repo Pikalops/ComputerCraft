@@ -2,20 +2,20 @@ local args = {...}
 branch = "main"
 
 function usage()
-	print("Usage: deploy <repo URL> [branch]\n\n")
-	print("If branch is omitted, main will be downloaded.\n")
-    print("Older repos user \"master\" as the default branch, specify it if necessary.\n")
+	print("Usage: deploy <github repo URL> [branch]\n")
+	print("If branch is omitted, main will be downloaded. Specify master if necessary.\n")
 	error()
 end
 
 -- Validate command line arguments
 if (table.getn(args) < 1) or (table.getn(args) > 2) then
 	usage()
+elseif (string.find(args[1], "github.com") == nil) then
+    usage()
 elseif (table.getn(args) == 2) then
     branch = args[2]
 end
 
---repoUrl = "https://github.com/Pikalops/ComputerCraft"
 -- Parse repo URL
 repoUrl = args[1]
 if (string.sub(repoUrl, -1) == "/") then
@@ -35,6 +35,9 @@ folderName = repoName .. "-" .. branch
 -- Download and extract archive
 shell.run("wget", archiveUrl)
 shell.run("tar", "-xzf", archiveName)
+
+-- Get rid of pkg folder, not useful ingame
+shell.run("rm", folderName .. "/pkg")
 
 -- Put files in /usr
 files = fs.list(folderName)
